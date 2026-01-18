@@ -695,9 +695,29 @@
             // Remove trailing slash
             if (basePath.endsWith('/')) basePath = basePath.slice(0, -1);
             
-            // Construct absolute URL to be safe
+            // Construct absolute URL
             const audioPath = `${window.location.origin}${basePath}/speech_audio/${speech.id}.mp3`;
             
+            // --- DEBUG INFO START ---
+            const debugDiv = document.getElementById('debug-info') || document.createElement('div');
+            debugDiv.id = 'debug-info';
+            debugDiv.style.cssText = 'background:black;color:yellow;padding:10px;margin-top:20px;font-family:monospace;word-break:break-all;';
+            debugDiv.innerHTML = `
+                <p><strong>Debug Info:</strong></p>
+                <p>Trying to load: <a href="${audioPath}" target="_blank" style="color:cyan">${audioPath}</a></p>
+                <p>Status: Loading...</p>
+            `;
+            document.querySelector('.container').appendChild(debugDiv);
+            
+            audio.onerror = (e) => {
+                debugDiv.innerHTML += `<p style="color:red">Error: Failed to load audio. (Code: ${audio.error ? audio.error.code : 'unknown'})</p>
+                <p>Please click the blue link above. If it says "404", the file is missing or path is wrong.</p>`;
+            };
+            audio.oncanplay = () => {
+                 debugDiv.innerHTML += `<p style="color:green">Success: Audio loaded!</p>`;
+            };
+            // --- DEBUG INFO END ---
+
             console.log("Attempting to load audio from:", audioPath);
             audio.src = audioPath;
             audio.load();
