@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语演讲影子跟读练习</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .player-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .now-playing-label {
+            background: #e94560;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .now-playing-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .text-display {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            line-height: 1.8;
+            font-size: 1.15rem;
+            color: #e2e8f0;
+            max-height: 300px;
+            overflow-y: auto;
+            cursor: pointer;
+            user-select: none; /* Prevent text selection on double click */
+            -webkit-user-select: none;
+            touch-action: manipulation; /* Improve touch response */
+        }
+
+        .sentence {
+            padding: 2px 4px;
+            border-radius: 4px;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .sentence:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sentence.active-sentence {
+            background: rgba(233, 69, 96, 0.4);
+            color: #fff;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .control-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .control-btn.play-btn {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #e94560, #ff6b6b);
+        }
+
+        .control-btn.play-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(233, 69, 96, 0.5);
+        }
+
+        .control-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .control-btn.play-btn svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ff6b6b);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s;
+        }
+
+        .time {
+            font-size: 0.9rem;
+            color: #94a3b8;
+            min-width: 45px;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .speed-control span {
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .speed-btn {
+            padding: 5px 12px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .speed-btn:hover, .speed-btn.active {
+            background: #e94560;
+            border-color: #e94560;
+        }
+
+        .playlist-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 15px;
+        }
+
+        .playlist-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+
+        .playlist-item.active {
+            background: rgba(233, 69, 96, 0.2);
+            border-color: #e94560;
+        }
+
+        .playlist-item.completed {
+            opacity: 0.6;
+        }
+
+        .playlist-item.completed .item-number {
+            background: #22c55e;
+        }
+
+        .item-number {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .playlist-item.active .item-number {
+            background: #e94560;
+        }
+
+        .item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .item-title {
+            font-weight: 500;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item-desc {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+
+        .item-duration {
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #e94560;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .loop-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .loop-indicator input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .playlist-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                gap: 20px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Vibe Coding 演讲练习</h1>
+            <p class="subtitle">影子跟读训练 · Shadow Reading Practice</p>
+        </header>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-value" id="completedCount">0</div>
+                <div class="stat-label">已完成</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="totalCount">30</div>
+                <div class="stat-label">总段落</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value" id="totalTime">~15min</div>
+                <div class="stat-label">预计时长</div>
+            </div>
+        </div>
+
+        <div class="player-section">
+            <div class="now-playing">
+                <span class="now-playing-label">正在播放</span>
+                <span class="now-playing-title" id="currentTitle">选择一个段落开始练习</span>
+            </div>
+            
+            <div class="text-display" id="textDisplay">
+                点击下方任意段落，开始影子跟读练习。建议先听一遍，然后跟着音频同步朗读，模仿语调和节奏。
+            </div>
+
+            <div class="controls">
+                <button class="control-btn" id="prevBtn" title="上一段">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
+                    </svg>
+                </button>
+                <button class="control-btn" id="replayBtn" title="重新播放">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+                    </svg>
+                </button>
+                <button class="control-btn play-btn" id="playBtn" title="播放/暂停">
+                    <svg viewBox="0 0 24 24" fill="currentColor" id="playIcon">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                </button>
+                <button class="control-btn" id="stopBtn" title="停止">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 6h12v12H6z"/>
+                    </svg>
+                </button>
+                <button class="control-btn" id="nextBtn" title="下一段">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="progress-container">
+                <span class="time" id="currentTime">0:00</span>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="time" id="duration">0:00</span>
+            </div>
+
+            <div class="speed-control">
+                <span>语速:</span>
+                <button class="speed-btn" data-speed="0.75">0.75x</button>
+                <button class="speed-btn active" data-speed="1">1x</button>
+                <button class="speed-btn" data-speed="1.25">1.25x</button>
+            </div>
+
+            <div class="loop-indicator">
+                <input type="checkbox" id="loopCheckbox">
+                <label for="loopCheckbox">单段循环播放</label>
+            </div>
+        </div>
+
+        <div class="playlist-section" id="playlist">
+            <!-- Items will be generated by JavaScript -->
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const speeches = [
+            {
+                id: "00_intro",
+                title: "00. 开场介绍",
+                desc: "Hi everyone, I'm Zexuan...",
+                text: "Hi everyone, I'm Zexuan. Today I want to share something I've been really excited about lately. First, please open this website — you can switch between Chinese and English in the top right corner. I built this page a little while ago. Let me ask you: how long do you think it took me to make this? Some of you might guess a day or two, maybe a week? Actually, from scratch to launch, about 45 minutes. And I didn't write a single line of CSS. That's not because I suddenly learned to code. It's because I used a new approach called Vibe Coding."
+            },
+            {
+                id: "01a_what_is_vibe",
+                title: "01a. 什么是 Vibe Coding",
+                desc: "Simply put: I describe...",
+                text: "So what exactly is Vibe Coding? Simply put: I describe the product I want, and AI writes the code for me."
+            },
+            {
+                id: "01b_old_way",
+                title: "01b. 传统工作方式",
+                desc: "The way we used to work...",
+                text: "The way we used to work — we'd create detailed mockups, mark every spacing, font size, and color, then hand it off to developers. We all know this process, and we all know how painful it can be. Want to change a small detail? Wait for the schedule, wait for development, wait for launch."
+            },
+            {
+                id: "01c_new_way",
+                title: "01c. 新的工作方式",
+                desc: "Now it's different...",
+                text: "Now it's different. I can just tell the AI: I think the information hierarchy isn't clear enough, or the layout doesn't look good, or even the product doesn't feel warm enough. As long as I describe my feelings, AI understands and updates the code directly. That's what Vibe means — I'm sharing feelings, not parameters."
+            },
+            {
+                id: "02a_five_steps_intro",
+                title: "02a. 五个步骤 (引入)",
+                desc: "How do I actually use it?...",
+                text: "How do I actually use it? It's pretty simple. Five steps."
+            },
+            {
+                id: "02b_five_steps_detail",
+                title: "02b. 五个步骤 (详解)",
+                desc: "Step one, have an idea...",
+                text: "Step one, have an idea — it can be vague, that's fine. Step two, describe it in plain language, no technical terms needed, just like chatting with a colleague. Step three, AI generates an MVP in seconds. Step four, see what's not right and keep talking — like \"make this button stand out more\" or \"this animation is too fast.\" Step five, when it feels ready, just launch it."
+            },
+            {
+                id: "02c_key_point",
+                title: "02c. 关键点：快速迭代",
+                desc: "What's the key point?...",
+                text: "What's the key point here? It's not about getting it perfect the first time. It's about fast iteration. Before, I'd hesitate to try uncertain ideas — what if it looks bad? Wouldn't that be a waste of effort? Now I don't overthink it. Trying something takes just seconds. If it doesn't work, I just try a different direction."
+            },
+            {
+                id: "03a_demo_intro",
+                title: "03a. 演示引入",
+                desc: "Let me show you a demo...",
+                text: "Let me show you a demo."
+            },
+            {
+                id: "03b_demo_animation",
+                title: "03b. 动画演示",
+                desc: "Look at this interactive demo...",
+                text: "Look at this interactive demo. Same shape, but I describe its \"feeling\" with different words, and the animation is completely different. I say \"sharp,\" the animation becomes crisp and snappy. I say \"fluid,\" it becomes soft and elastic. I say \"bouncy,\" it springs back. I say \"heavy,\" it moves slowly, like it has weight. I didn't write any animation code. I just described the physical feeling I wanted."
+            },
+            {
+                id: "04a_coffee_intro",
+                title: "04a. 咖啡菜单 (引入)",
+                desc: "A more complete example...",
+                text: "Let me show you a more complete example. This is a coffee menu. I described it three different ways and got completely different results."
+            },
+            {
+                id: "04b_coffee_v1",
+                title: "04b. 咖啡菜单 V1",
+                desc: "Basic list...",
+                text: "First version, I just said \"make me a coffee menu.\" What came out was a basic list — names, prices, functional but plain."
+            },
+            {
+                id: "04c_coffee_v2",
+                title: "04c. 咖啡菜单 V2",
+                desc: "Specialty coffee shop...",
+                text: "Second version, I said \"I want it to feel like a specialty coffee shop.\" Look — the layout became refined, the typography has layers, the whole style feels more professional."
+            },
+            {
+                id: "04d_coffee_v3",
+                title: "04d. 咖啡菜单 V3",
+                desc: "Late night, quiet...",
+                text: "Third version, I said \"late night, quiet, I want a pure sense of calm.\" This one is completely different — there's rain in the background, you can hear the rain, the whole mood shifted. We can even control how heavy the rain is."
+            },
+            {
+                id: "04e_coffee_summary",
+                title: "04e. 咖啡菜单总结",
+                desc: "Shaping feelings...",
+                text: "Same content, different words, completely different results. That's what makes Vibe Coding fun — you're not tweaking parameters, you're shaping feelings."
+            },
+            {
+                id: "05a_more_examples",
+                title: "05a. 更多案例 (引入)",
+                desc: "What else can it do?...",
+                text: "Besides websites, what else can Vibe Coding do? Let me show you a few more interesting examples — all built this way."
+            },
+            {
+                id: "05b_booth",
+                title: "05b. 摊位模拟器",
+                desc: "Booth simulator...",
+                text: "First: a booth simulator. If you're thinking about setting up a booth, you can try out what your future booth might look like."
+            },
+            {
+                id: "05c_travel",
+                title: "05c. 旅游规划工具",
+                desc: "Travel planning tool...",
+                text: "Second: a travel planning tool. It generates a complete trip plan — where to go each day, what to do and when. The best part? It connects directly to Google Maps — one tap and you're navigating. There's also an expense tracker for splitting costs after the trip."
+            },
+            {
+                id: "05d_nutrition",
+                title: "05d. 营养标签识别",
+                desc: "Nutrition label scanner...",
+                text: "Third: a nutrition label scanner. Ever picked up a snack at the supermarket, looked at all those chemical names on the back, and had no idea if it's healthy? This tool solves that. Take a photo of the package, and AI analyzes the ingredients, telling you in plain language what you're really eating."
+            },
+            {
+                id: "05e_stock",
+                title: "05e. 量化炒股助手",
+                desc: "Stock trading assistant...",
+                text: "Fourth: a stock trading assistant. This one's a bit hardcore. It automatically scrapes stock data, has AI analyze charts, identify key patterns, and generates a daily report — helping avoid emotional trading."
+            },
+            {
+                id: "05f_more_tools",
+                title: "05f. 更多工具提及",
+                desc: "Figma plugin & shadow reading...",
+                text: "The fifth example is a Figma plugin I made, and the sixth is a shadow reading practice tool — I'll share those at the end."
+            },
+            {
+                id: "05g_common_point",
+                title: "05g. 共同点：解决具体问题",
+                desc: "Solve specific problems...",
+                text: "You'll notice these examples have something in common: they all solve a specific problem for a specific person. Before, if you had a small pain point, you'd probably just live with it — building a dedicated tool felt like too much work. Now it's different. You have an idea, describe it clearly, and in a few hours — sometimes even minutes — you have something that works. That's what excites me most about Vibe Coding — it lets ordinary people turn ideas into products."
+            },
+            {
+                id: "06a_limitations",
+                title: "06a. 局限性",
+                desc: "Things it can't do...",
+                text: "Of course, there are things it can't do. For complex systems, scenarios that require strict design systems, or products like finance and payments where stability is critical — handwritten code with rigorous testing is still more reliable."
+            },
+            {
+                id: "06b_summary",
+                title: "06b. 总结",
+                desc: "Zero to one...",
+                text: "So here's how I see it: Vibe Coding is great for the zero-to-one phase, for quickly validating ideas."
+            },
+            {
+                id: "07a_meta",
+                title: "07a. 元叙事 (这个网页)",
+                desc: "The website itself...",
+                text: "One last thing I find quite interesting. The website you're looking at right now — it's about Vibe Coding, and it was itself built with Vibe Coding. I barely wrote any code. I just kept describing what I wanted to the AI. From idea to launch, about 45 minutes, around 14 rounds of conversation. So if you ask me whether Vibe Coding actually works, my answer is: you're looking at the proof."
+            },
+            {
+                id: "07b_closing",
+                title: "07b. 结尾",
+                desc: "Thank you...",
+                text: "That's all from me today. Yuyuan will show you how the tools actually work in a moment. If you're curious, I encourage you to try it yourself. Thank you."
+            },
+            {
+                id: "08a_figma_problem",
+                title: "08a. Figma 插件痛点",
+                desc: "Cover template problem...",
+                text: "When we deliver designs in Figma, we need to find the cover template file first, then choose the type, write the title, translate the title, take a screenshot, set it as cover — and we often can't find our own design files."
+            },
+            {
+                id: "08b_figma_plugin",
+                title: "08b. Quick Cover Generator",
+                desc: "Plugin features...",
+                text: "So I used Vibe Coding to build a plugin called \"Quick Cover Generator.\" You can pick the project type — Trip, Ctrip, C&T, Collection, To B, whatever you want. Then add tags, fill in the title, and one click translates the Chinese title to English automatically. You can also capture your current page as a thumbnail with one click. The best part — you can put your own avatar on the cover. That way, in a sea of files, you can instantly spot which ones are yours."
+            },
+            {
+                id: "08c_figma_time",
+                title: "08c. 开发时间与鼓励",
+                desc: "One afternoon...",
+                text: "The whole plugin, from idea to working product, took about an afternoon. If you think Figma is missing some plugin, or there's some repetitive work you'd like to automate, try building one yourself."
+            },
+            {
+                id: "09_shadow_reading",
+                title: "09. 影子跟读工具",
+                desc: "Shadow reading tool...",
+                text: "Finally, to practice for this English presentation, I built a shadow reading practice tool. Let me show you how it works."
+            }
+        ];
+
+        let currentIndex = -1;
+        let completedSet = new Set();
+        const audio = document.getElementById('audioPlayer');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const textDisplay = document.getElementById('textDisplay');
+        const currentTitle = document.getElementById('currentTitle');
+        const loopCheckbox = document.getElementById('loopCheckbox');
+
+        // Generate playlist
+        const playlist = document.getElementById('playlist');
+        speeches.forEach((speech, index) => {
+            const item = document.createElement('div');
+            item.className = 'playlist-item';
+            item.dataset.index = index;
+            item.innerHTML = `
+                <div class="item-number">${index + 1}</div>
+                <div class="item-info">
+                    <div class="item-title">${speech.title}</div>
+                    <div class="item-desc">${speech.desc}</div>
+                </div>
+            `;
+            item.addEventListener('click', () => loadAndPlay(index));
+            playlist.appendChild(item);
+        });
+
+        function loadAndPlay(index) {
+            if (index < 0 || index >= speeches.length) return;
+            
+            currentIndex = index;
+            const speech = speeches[index];
+            
+            // Update UI
+            document.querySelectorAll('.playlist-item').forEach((item, i) => {
+                item.classList.toggle('active', i === index);
+            });
+            
+            textDisplay.innerHTML = ''; // Clear text
+            
+            // Split text into sentences and wrap in spans
+            const sentences = speech.text.match(/[^.!?]+[.!?]+["']?|[^.!?]+$/g) || [speech.text];
+            
+            sentences.forEach(sentence => {
+                const span = document.createElement('span');
+                span.className = 'sentence';
+                span.textContent = sentence.trim() + ' ';
+                
+                // Double click to speak sentence
+                span.addEventListener('dblclick', (e) => {
+                    e.stopPropagation(); // Prevent triggering container click
+                    speakSentence(sentence);
+                    highlightSentence(span);
+                });
+                
+                // Touch events for iPad (simulating double tap)
+                let lastTap = 0;
+                span.addEventListener('touchend', (e) => {
+                    const currentTime = new Date().getTime();
+                    const tapLength = currentTime - lastTap;
+                    if (tapLength < 500 && tapLength > 0) {
+                        e.stopPropagation();
+                        e.preventDefault(); // Prevent zoom
+                        speakSentence(sentence);
+                        highlightSentence(span);
+                    }
+                    lastTap = currentTime;
+                });
+
+                textDisplay.appendChild(span);
+            });
+            
+            // Load audio
+            audio.src = `speech_audio/${speech.id}.mp3`;
+            audio.load();
+            // Auto play on load is annoying on mobile, keeping it manual or triggered by click
+            // audio.play(); 
+            updatePlayButton(false);
+        }
+
+        // System TTS for single sentences
+        function speakSentence(text) {
+            // Stop background audio
+            audio.pause();
+            updatePlayButton(false);
+            
+            // Stop previous TTS
+            window.speechSynthesis.cancel(); 
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.9; 
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function highlightSentence(element) {
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active-sentence'));
+            element.classList.add('active-sentence');
+        }
+
+        // Single click on container to play full audio
+        textDisplay.addEventListener('click', () => {
+            // Stop any sentence speaking
+            window.speechSynthesis.cancel();
+            document.querySelectorAll('.sentence').forEach(s => s.classList.remove('active-sentence'));
+
+             if (audio.paused) {
+                audio.play();
+                updatePlayButton(true);
+            } else {
+                audio.pause();
+                updatePlayButton(false);
+            }
+        });
+
+        function updatePlayButton(isPlaying) {
+            playIcon.innerHTML = isPlaying 
+                ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+                : '<path d="M8 5v14l11-7z"/>';
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Event listeners
+        playBtn.addEventListener('click', () => {
+            if (currentIndex === -1) {
+                loadAndPlay(0);
+                return;
+            }
+            if (audio.paused) {
+                audio.play();
+                updatePlayButton(true);
+            } else {
+                audio.pause();
+                updatePlayButton(false);
+            }
+        });
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentIndex > 0) loadAndPlay(currentIndex - 1);
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentIndex < speeches.length - 1) loadAndPlay(currentIndex + 1);
+        });
+
+        document.getElementById('replayBtn').addEventListener('click', () => {
+            if (currentIndex >= 0) {
+                audio.currentTime = 0;
+                audio.play();
+                updatePlayButton(true);
+            }
+        });
+
+        document.getElementById('stopBtn').addEventListener('click', () => {
+            audio.pause();
+            audio.currentTime = 0;
+            updatePlayButton(false);
+        });
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressFill.style.width = `${percent}%`;
+                currentTimeEl.textContent = formatTime(audio.currentTime);
+            }
+        });
+
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+        });
+
+        audio.addEventListener('ended', () => {
+            // Mark as completed
+            if (currentIndex >= 0) {
+                completedSet.add(currentIndex);
+                document.querySelectorAll('.playlist-item')[currentIndex].classList.add('completed');
+                document.getElementById('completedCount').textContent = completedSet.size;
+            }
+            
+            if (loopCheckbox.checked) {
+                audio.currentTime = 0;
+                audio.play();
+            } else if (currentIndex < speeches.length - 1) {
+                loadAndPlay(currentIndex + 1);
+            } else {
+                updatePlayButton(false);
+            }
+        });
+
+        document.getElementById('progressBar').addEventListener('click', (e) => {
+            const rect = e.target.getBoundingClientRect();
+            const percent = (e.clientX - rect.left) / rect.width;
+            audio.currentTime = percent * audio.duration;
+        });
+
+        document.querySelectorAll('.speed-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                audio.playbackRate = parseFloat(btn.dataset.speed);
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                playBtn.click();
+            } else if (e.code === 'ArrowLeft') {
+                document.getElementById('prevBtn').click();
+            } else if (e.code === 'ArrowRight') {
+                document.getElementById('nextBtn').click();
+            } else if (e.code === 'KeyR') {
+                document.getElementById('replayBtn').click();
+            }
+        });
+    </script>
+</body>
+</html>
