@@ -688,7 +688,18 @@
             });
             
             // Load audio
-            audio.src = `speech_audio/${speech.id}.mp3`;
+            // Smart path detection for both GitHub Pages and Vercel/Local
+            let basePath = window.location.pathname;
+            // Remove index.html if present
+            basePath = basePath.replace('index.html', '');
+            // Remove trailing slash
+            if (basePath.endsWith('/')) basePath = basePath.slice(0, -1);
+            
+            // Construct absolute URL to be safe
+            const audioPath = `${window.location.origin}${basePath}/speech_audio/${speech.id}.mp3`;
+            
+            console.log("Attempting to load audio from:", audioPath);
+            audio.src = audioPath;
             audio.load();
             // Auto play on load is annoying on mobile, keeping it manual or triggered by click
             // audio.play(); 
